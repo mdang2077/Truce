@@ -1,8 +1,8 @@
-// apps/web/src/pages/checkout.tsx
+// apps/web/src/app/checkout/page.tsx
 'use client';
 import { useEffect, useState } from 'react';
-import { CheckoutResponse, fetchCheckout } from '../api/checkoutClient';
-import CheckoutSummary from '../components/CheckoutSummary';
+import { CheckoutResponse, fetchCheckout } from '../../api/checkoutClient';
+import CheckoutSummary from '../../components/CheckoutSummary';
 
 export default function CheckoutPage() {
   const [order, setOrder] = useState<CheckoutResponse | null>(null);

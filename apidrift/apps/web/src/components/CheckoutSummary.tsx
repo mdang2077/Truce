@@ -5,9 +5,12 @@
 import { CheckoutResponse } from '../api/checkoutClient';
 
 export function formatCheckout(order: CheckoutResponse) {
+  // Handle undefined total gracefully to show $NaN
+  const totalValue = order.total !== undefined ? order.total.toFixed(2) : 'NaN';
+  
   return {
     id: order.orderId,
-    total: `$${order.total.toFixed(2)}`,                        // ← $NaN (total is undefined)
+    total: `$${totalValue}`,                                    // ← $NaN (total is undefined)
     statusLabel: order.status === 'paid' ? 'Paid' : 'Unknown',  // ← "Unknown" (backend returns "PAID")
   };
 }
