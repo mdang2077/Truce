@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: APIDrift Demo API
+  version: 1.0.0
+  description: >
+    STALE CONTRACT — intentionally out of sync with the backend.
+    Backend now returns totalCents + uppercase status.
+    This file still documents the OLD contract.
+    Used by IBM Bob to detect drift.
+
+paths:
+  /api/checkout:
+    post:
+      summary: Process checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+      responses:
+        '200':
+          description: Checkout complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    example: "ORD-1042"
+                  total:
+                    type: number
+                    description: Total order amount in dollars (STALE — backend now returns totalCents)
+                    example: 84.70
+                  status:
+                    type: string
+                    description: Payment status (STALE — backend now returns uppercase)
+                    enum: ["pending", "paid", "failed"]

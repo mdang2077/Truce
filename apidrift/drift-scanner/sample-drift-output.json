@@ -1,0 +1,55 @@
+{
+  "driftFound": true,
+  "scannedAt": "2026-05-01T00:00:00Z",
+  "severity": "high",
+  "businessImpact": "Checkout confirmation displays incorrect payment totals and unknown payment status. This affects a revenue-critical user flow and may cause transaction abandonment.",
+  "affectedFlow": "Checkout confirmation (checkout.tsx → /api/checkout route)",
+  "fields": [
+    {
+      "field": "Total amount",
+      "frontend": "total (number, dollars)",
+      "backend": "totalCents (integer, cents)",
+      "openapi": "total (number)",
+      "diagnosis": "field drift",
+      "severity": "Breaking",
+      "userImpact": "Checkout UI shows $NaN"
+    },
+    {
+      "field": "Currency unit",
+      "frontend": "dollars",
+      "backend": "cents",
+      "openapi": "dollars",
+      "diagnosis": "semantic drift",
+      "severity": "Breaking",
+      "userImpact": "Price display incorrect even if field name matched"
+    },
+    {
+      "field": "Status enum",
+      "frontend": "lowercase (\"paid\")",
+      "backend": "uppercase (\"PAID\")",
+      "openapi": "lowercase (\"paid\")",
+      "diagnosis": "enum drift",
+      "severity": "Breaking",
+      "userImpact": "Payment status always shows \"Unknown\""
+    }
+  ],
+  "evidenceTrail": [
+    "Found frontend reads checkout.total in checkoutClient.ts",
+    "Found backend route now returns totalCents instead of total",
+    "Found OpenAPI spec still documents total as a decimal number",
+    "Found frontend expects status === \"paid\"",
+    "Found backend returns status === \"PAID\"",
+    "Determined backend change is intentional — integer cents safer for currency precision",
+    "Recommended syncing frontend and OpenAPI to backend contract"
+  ],
+  "recommendedFix": "Update frontend and OpenAPI spec to match backend (totalCents + uppercase enums)",
+  "canonicalLayer": "backend",
+  "reasoning": "Backend change appears intentional — integer cents is best practice for currency",
+  "ticketRouting": {
+    "priority": "High",
+    "assignedTo": "API Platform Team",
+    "notified": ["Frontend Owner", "Backend Owner"],
+    "attachments": ["Bob drift report", "Patch diff"],
+    "dueDate": "Before next deploy"
+  }
+}

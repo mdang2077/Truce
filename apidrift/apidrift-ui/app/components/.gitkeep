@@ -1,0 +1,3 @@
+# apidrift-ui components placeholder
+# Run: npx create-next-app@latest . --typescript --tailwind --app --no-src-dir
+# from this directory to initialize the Next.js app
