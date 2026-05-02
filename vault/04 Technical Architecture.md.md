@@ -1,25 +1,31 @@
 # Technical Architecture — APIDrift
 
 **Created:** 2026-05-01
-**Updated:** 2026-05-01 — Severity + business impact + ticket routing added
+**Updated:** 2026-05-01 — Bob IDE analyzed vault; setup details confirmed
 **Status:** Confirmed ✅
 
 ---
 
 ## Architecture Overview
 
-APIDrift is a Next.js application that demonstrates contract drift detection using IBM Bob IDE. It includes a real broken checkout app (Next.js + Express) and the APIDrift product UI (10 screens). Bob IDE is the required core tool — 5 tasks with session exports.
+APIDrift is a monorepo with three apps (broken checkout frontend, drifted Express backend, APIDrift product UI) plus a contracts folder and drift-scanner. IBM Bob IDE is the required core tool — 5 tasks with session exports.
 
 ```
 apidrift/
 ├── apps/
 │   ├── web/                          ← Broken checkout frontend (Next.js, port 3000)
+│   │   ├── package.json
+│   │   ├── next.config.js
+│   │   ├── tsconfig.json
 │   │   └── src/
 │   │       ├── pages/checkout.tsx
 │   │       ├── api/checkoutClient.ts ← reads order.total → $NaN
 │   │       └── components/CheckoutSummary.tsx
 │   └── api/                          ← Drifted backend (Express, port 3001)
+│       ├── package.json
+│       ├── tsconfig.json
 │       └── src/
+│           ├── server.ts
 │           ├── routes/checkout.ts    ← returns totalCents, "PAID"
 │           ├── schemas/checkoutSchema.ts
 │           └── tests/checkout.contract.test.ts
@@ -31,25 +37,31 @@ apidrift/
 │   ├── bob-task-4-pr-summary.md      ← Saved Bob Task 4 output
 │   └── sample-drift-output.json     ← Hardcoded drift data (unblocks UI)
 ├── apidrift-ui/                      ← APIDrift product (Next.js, port 3002)
+│   ├── package.json
+│   ├── next.config.js
+│   ├── tsconfig.json
 │   └── app/
-│       ├── page.tsx                  ← Orchestrates all 10 screens
+│       ├── page.tsx
 │       └── components/
 │           ├── BrokenCheckout.tsx        ← Screen 1
 │           ├── ContractSources.tsx       ← Screen 2
 │           ├── DriftMatrix.tsx           ← Screen 3 (priority)
 │           ├── BobEvidenceTrail.tsx      ← Screen 4
-│           ├── SeverityImpact.tsx        ← Screen 5 (new)
+│           ├── SeverityImpact.tsx        ← Screen 5
 │           ├── FixStrategy.tsx           ← Screen 6
 │           ├── PatchPanel.tsx            ← Screen 7
 │           ├── ContractTestPanel.tsx     ← Screen 8
-│           ├── TicketRouting.tsx         ← Screen 9 (new)
+│           ├── TicketRouting.tsx         ← Screen 9
 │           ├── FixedCheckout.tsx         ← Screen 10a
 │           ├── PRSummary.tsx             ← Screen 10b
 │           └── BobSidebar.tsx            ← Persistent sidebar
-└── bob_sessions/                     ← Required for submission
-    ├── task-1-screenshot.png
-    ├── task-1-history.md
-    └── ...
+├── bob_sessions/                     ← Required for submission
+│   ├── task-1-screenshot.png
+│   ├── task-1-history.md
+│   └── ...
+├── package.json                      ← Root monorepo package.json
+├── .gitignore
+└── README.md
 ```
 
 ---
@@ -60,13 +72,137 @@ apidrift/
 |---|---|---|
 | APIDrift UI | Next.js 14 + Tailwind CSS | Fast setup; Havyn knows React/TS |
 | Demo checkout frontend | Next.js (same monorepo) | Reuse stack |
-| Demo API backend | Express + Node.js | Fast to seed drift |
+| Demo API backend | Express + Node.js + TypeScript | Fast to seed drift |
 | API contract | OpenAPI YAML | Standard; easy to show drift |
 | Contract tests | Jest + Supertest | Standard Node.js testing |
 | Drift data | Hardcoded JSON | Unblocks UI; don't over-engineer scanner |
 | Bob outputs | Saved Markdown/JSON fallback files | Demo never depends on live Bob latency |
 | Code display | `react-syntax-highlighter` | Patch diff + contract test |
 | IBM Bob | Bob IDE (required) — 5 tasks | Task sessions exported for judging |
+
+---
+
+## System Requirements (confirmed by Bob analysis)
+
+| Requirement | Version |
+|---|---|
+| Node.js | v18+ |
+| npm | v9+ (or yarn) |
+| Git | Any recent version |
+| IBM Bob IDE | Installed + authenticated with ibm-coding-challenge-xxx |
+| Browser | Chrome or Firefox (test $NaN rendering before recording) |
+
+---
+
+## Setup Commands
+
+```bash
+# 1. Create and enter project root
+mkdir apidrift && cd apidrift
+
+# 2. Create directory structure
+mkdir -p apps/web/src/{pages,api,components}
+mkdir -p apps/api/src/{routes,schemas,tests}
+mkdir -p contracts drift-scanner
+mkdir -p apidrift-ui/app/components
+mkdir -p bob_sessions   # Create this BEFORE first Bob task
+
+# 3. Initialize Next.js apps
+cd apps/web
+npx create-next-app@latest . --typescript --tailwind --app --no-src-dir
+cd ../..
+
+cd apidrift-ui
+npx create-next-app@latest . --typescript --tailwind --app --no-src-dir
+cd ..
+
+# 4. Initialize Express API
+cd apps/api
+npm init -y
+npm install express cors
+npm install -D typescript @types/node @types/express ts-node nodemon \
+  jest supertest @types/jest @types/supertest ts-jest
+npx tsc --init
+cd ../..
+
+# 5. Install root dev dependencies
+npm install -D concurrently
+
+# 6. Install APIDrift UI dependencies
+cd apidrift-ui
+npm install react-syntax-highlighter
+npm install -D @types/react-syntax-highlighter
+cd ..
+```
+
+---
+
+## Root package.json (Monorepo)
+
+```json
+{
+  "name": "apidrift",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["apps/*", "apidrift-ui"],
+  "scripts": {
+    "dev:api":      "cd apps/api && npm run dev",
+    "dev:checkout": "cd apps/web && npm run dev",
+    "dev:ui":       "cd apidrift-ui && npm run dev",
+    "dev:all":      "concurrently \"npm run dev:api\" \"npm run dev:checkout\" \"npm run dev:ui\"",
+    "test":         "cd apps/api && npm test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}
+```
+
+---
+
+## .gitignore
+
+```
+node_modules/
+.next/
+dist/
+build/
+.env
+.env.local
+*.log
+.DS_Store
+```
+
+---
+
+## Environment Variables
+
+```bash
+# apps/web/.env.local
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# apps/api/.env
+PORT=3001
+NODE_ENV=development
+
+# apidrift-ui/.env.local
+NEXT_PUBLIC_DRIFT_DATA_PATH=/drift-scanner/sample-drift-output.json
+```
+
+---
+
+## Jest Config (apps/api/jest.config.js)
+
+```js
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  testMatch: ['**/*.test.ts'],
+  collectCoverageFrom: ['src/**/*.ts'],
+};
+```
+
+Run tests: `cd apps/api && npm test`
 
 ---
 
@@ -103,7 +239,7 @@ export function formatCheckout(order: CheckoutResponse) {
   return {
     id: order.orderId,
     total: `$${order.total.toFixed(2)}`,               // ← $NaN
-    statusLabel: order.status === "paid" ? "Paid" : "Unknown"  // ← "Unknown"
+    statusLabel: order.status === "paid" ? "Paid" : "Unknown"
   };
 }
 ```
@@ -126,14 +262,14 @@ export function formatCheckout(order: CheckoutResponse) {
                   type: number
                 status:
                   type: string
-                  enum: ["pending", "paid", "failed"]  # stale: uppercase
+                  enum: ["pending", "paid", "failed"]  # stale: should be uppercase
 ```
 
 ---
 
-## Drift Data JSON (Hardcoded — Build This First)
+## Drift Data JSON (Build This First — Unblocks All 10 Screens)
 
-This unblocks all 10 UI screens before Bob runs.
+Save as `drift-scanner/sample-drift-output.json`:
 
 ```json
 {
@@ -202,18 +338,16 @@ This unblocks all 10 UI screens before Bob runs.
 - Severity badge: 🔴 Breaking (red), 🟡 Medium (yellow), ⚪ Cosmetic (grey)
 - Whole row tinted by severity
 - Data from `fields` array in drift JSON
-- This is the "screenshot moment" — make it beautiful
+- This is the "screenshot moment" — invest extra polish here
 
-### SeverityImpact.tsx (Screen 5 — new)
-- Large severity badge at top (🔴 HIGH)
-- Business impact paragraph from `businessImpact` field
-- "Affected flow" and "Risk level" metadata
-- Keep it clean — one card, bold text, red accent
+### SeverityImpact.tsx (Screen 5)
+- Large 🔴 HIGH badge at top
+- `businessImpact` paragraph
+- `affectedFlow` and risk level metadata
 
-### TicketRouting.tsx (Screen 9 — new)
-- Simulated ticket card
-- Checkmark list: "✓ Created high-priority task", "✓ Assigned to: API Platform Team", etc.
-- From `ticketRouting` object in drift JSON
+### TicketRouting.tsx (Screen 9)
+- Simulated ticket card from `ticketRouting` object in drift JSON
+- Checkmark list for each action
 - Optional: wire real Orchestrate agent if time allows
 
 ### BobSidebar.tsx (persistent throughout)
@@ -234,7 +368,7 @@ Bob was used for:
 
 ## IBM Bob IDE Tasks — Full Prompts
 
-### Task 1: Analyze Contract Drift (updated — includes severity)
+### Task 1: Analyze Contract Drift + Severity
 ```
 Analyze this repo for API contract drift in the checkout flow.
 
@@ -253,6 +387,7 @@ Return:
 5. recommended fix strategy with engineering rationale
 6. confidence level with evidence
 ```
+Save as: `drift-scanner/bob-task-1-analysis.md`
 
 ### Task 2: Generate Patch
 ```
@@ -261,6 +396,7 @@ Use totalCents as canonical (integer cents = best practice for currency).
 Update: checkoutClient.ts, CheckoutSummary.tsx, openapi.yaml.
 Show before/after diff for each file. Explain each change.
 ```
+Save as: `drift-scanner/bob-task-2-patch.md`
 
 ### Task 3: Generate Contract Test
 ```
@@ -269,6 +405,7 @@ apps/api/src/routes/checkout.ts.
 Assert: totalCents exists (Number), total does NOT exist,
 status is "PAID". Under 30 lines.
 ```
+Save as: `apps/api/src/tests/checkout.contract.test.ts`
 
 ### Task 4: Generate PR Summary
 ```
@@ -276,6 +413,7 @@ Generate a PR description for this API contract drift fix.
 Include: drift found, user impact, files changed, tests added,
 why totalCents is canonical, rollback risk.
 ```
+Save as: `drift-scanner/bob-task-4-pr-summary.md`
 
 ### Task 5: Bob Skill (stretch)
 ```
@@ -290,27 +428,36 @@ Save as .bob/commands/api-contract-drift-review.md
 ## Local Dev Setup
 
 ```bash
-# Run demo checkout app
-cd apps/api && node server.js          # port 3001 — drifted backend
-cd apps/web && npm run dev             # port 3000 — broken frontend
-# Visit localhost:3000/checkout → see $NaN and "Unknown"
+# Terminal 1
+cd apps/api && npm run dev           # port 3001
 
-# Run APIDrift product UI
-cd apidrift-ui && npm run dev          # port 3002
-# Visit localhost:3002 → APIDrift 10-screen demo
+# Terminal 2
+cd apps/web && npm run dev           # port 3000 → visit /checkout → see $NaN
+
+# Terminal 3
+cd apidrift-ui && npm run dev        # port 3002 → APIDrift product UI
+
+# Or all at once from root:
+npm run dev:all
 ```
 
-**For video recording:** Screen-record localhost:3002. Open with a quick cut to localhost:3000 to show the real broken app before switching to APIDrift.
+**Verify setup:**
+- `localhost:3000/checkout` → shows $NaN and "Unknown" (large, red)
+- `localhost:3001/checkout` (POST) → returns `{ totalCents: 8470, status: "PAID" }`
+- `localhost:3002` → APIDrift UI loads all 10 screens
 
 ---
 
-## High-Risk Points
+## Technical Risk Flags
 
-| Risk | Mitigation |
-|---|---|
-| $NaN not rendering | Make it large, red, bold — this is the hook |
-| Bob Task 1 doesn't classify severity clearly | Prompt explicitly asks for Breaking/Medium/Cosmetic; retry if vague |
-| SeverityImpact card looks generic | Use bold red header + specific flow name ("checkout confirmation") |
-| TicketRouting looks fake | Use real Orchestrate if time allows; otherwise make the simulated card clean |
-| DriftMatrix polish takes too long | Build with inline Tailwind first; refine colors Day 2 |
-| bob_sessions not captured | Create folder Day 1; export after every task |
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Port conflicts (3000/3001/3002) | Medium | Check `lsof -i :3000` etc. before starting; kill any blocking processes |
+| CORS between localhost:3000/3002 and localhost:3001 | Low | Add `cors()` middleware to Express — 2-line fix |
+| $NaN not rendering visibly | High — kills the demo hook | Use `text-4xl text-red-600 font-bold`; force string if browser converts: `"$NaN"` |
+| TypeScript strict mode errors | Low | Adjust `tsconfig.json` strict settings if blocking early build |
+| Next.js caching issues | Low | Use `--turbo` flag if hot reload is slow: `next dev --turbo` |
+| Bob Task 1 vague on severity | Medium | Explicitly ask for "Breaking/Medium/Cosmetic"; retry with tighter prompt |
+| bob_sessions not captured | High — required deliverable | Create folder before first task; export after EVERY session |
+| Using personal Bob account | Medium | Verify `ibm-coding-challenge-xxx` in IDE settings before every session |
+| Live Bob latency during recording | High | Always use saved fallback files for demo video — never live Bob |

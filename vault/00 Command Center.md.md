@@ -11,7 +11,7 @@ Target User: Frontend + backend engineers and tech leads at fast-moving product 
 Core Problem: Contract drift — one layer changes, the others don't. The backend is correct, the frontend is correct, but the product is broken because they no longer agree.
 Core Solution: IBM Bob compares frontend usage, backend routes, and OpenAPI docs → drift matrix with severity + business impact + patch + contract test + ticket routing + PR summary
 Current MVP: Broken checkout demo app + APIDrift UI (10 screens) + 5 Bob IDE tasks
-Tech Stack: Next.js + Tailwind (APIDrift UI + demo frontend), Express (demo API), OpenAPI YAML, Jest + Supertest, TypeScript
+Tech Stack: Next.js 14 + Tailwind (APIDrift UI + demo frontend), Express + TypeScript (demo API), OpenAPI YAML, Jest + Supertest, react-syntax-highlighter
 Current Status: All planning complete — READY TO BUILD (as of 2026-05-01)
 
 **Hackathon Theme:** "Turn idea into impact faster"
@@ -51,9 +51,10 @@ All Incident Detective planning preserved in 10 AI Specialist Outputs.md §1–�
 2. ~~Lock project idea~~ ✅ Done — APIDrift
 3. ~~Define MVP scope + architecture~~ ✅ Done — 10 screens, 5 Bob tasks
 4. ~~Demo + Pitch package~~ ✅ Done — script, statements, Q&A ready
-5. **Build broken checkout app** — $NaN must render before anything else
-6. **Build APIDrift UI (all 10 screens, static data)** — full story visible
-7. **Run Bob IDE Tasks 1–4** — generate real artifacts, save fallbacks
+5. ~~Bob analyzed vault + confirmed project structure~~ ✅ Done — setup guide confirmed
+6. **Build broken checkout app** — $NaN must render before anything else
+7. **Build APIDrift UI (all 10 screens, static data)** — full story visible
+8. **Run Bob IDE Tasks 1–4** — generate real artifacts, save fallbacks
 
 ---
 
@@ -65,16 +66,18 @@ All Incident Detective planning preserved in 10 AI Specialist Outputs.md §1–�
 | Lock project idea | Havyn | ✅ DONE | APIDrift |
 | Fill 01 Project Brief | Command Center | ✅ DONE | APIDrift brief |
 | Fill 03 MVP Scope | Command Center | ✅ DONE | 10 screens + 5 tasks |
-| Fill 04 Technical Architecture | Command Center | ✅ DONE | Stack + components + Bob prompts |
-| Fill 06 Demo and Pitch | Command Center | ✅ DONE | Full script + statements |
+| Fill 04 Technical Architecture | Command Center | ✅ DONE | Stack + setup + Bob prompts |
+| Fill 06 Demo and Pitch | Command Center | ✅ DONE | Full script + paste-ready statements |
 | Fill 07 Judge Q&A | Command Center | ✅ DONE | 5 Q&A pairs |
+| Bob analyzed vault + confirmed setup | Bob IDE | ✅ DONE | Node 18+, npm 9+, Jest ts-jest confirmed |
 | Create `bob_sessions/` folder in repo | Havyn | ⬜ TODO | Before first Bob task |
+| Run setup commands (see 04 Arch) | Havyn | ⬜ TODO | mkdir structure → create-next-app → init Express |
 | Build broken checkout backend (totalCents, PAID) | Havyn | ⬜ TODO | Express; port 3001 |
 | Build broken checkout frontend (reads total → $NaN) | Havyn | ⬜ TODO | Next.js; port 3000 |
-| Confirm $NaN renders correctly | Havyn | ⬜ TODO | Must look bad — large, red |
+| Confirm $NaN renders large + red | Havyn | ⬜ TODO | text-4xl text-red-600 font-bold |
 | Build fixed checkout version | Havyn | ⬜ TODO | Confirms patch before Bob generates it |
-| Create drift data JSON (with severity + businessImpact) | Havyn | ⬜ TODO | See 04 Technical Architecture for schema |
-| Build APIDrift UI — all 10 screens (static data) | Havyn | ⬜ TODO | DriftMatrix is priority |
+| Create drift data JSON (severity + businessImpact) | Havyn | ⬜ TODO | Schema in 04 Technical Architecture |
+| Build APIDrift UI — all 10 screens (static data) | Havyn | ⬜ TODO | DriftMatrix.tsx is priority |
 | Run Bob Task 1: Analyze contract drift + severity | Havyn | ⬜ TODO | Save as bob-task-1-analysis.md |
 | Run Bob Task 2: Generate patch | Havyn | ⬜ TODO | Save as bob-task-2-patch.md |
 | Run Bob Task 3: Generate contract test | Havyn | ⬜ TODO | Save as checkout.contract.test.ts |
@@ -109,6 +112,8 @@ All Incident Detective planning preserved in 10 AI Specialist Outputs.md §1–�
 | No real-time alerts, no real Jira/Slack/GitHub PR | Out of scope; simulate where needed | 2026-05-01 |
 | One monorepo demo only | Multi-repo adds complexity without demo value | 2026-05-01 |
 | Bob IDE required; ibm-coding-challenge-xxx only | Per official guide | 2026-05-01 |
+| Monorepo: npm workspaces + concurrently | Confirmed by Bob analysis; run all 3 apps with npm run dev:all | 2026-05-01 |
+| Jest config: ts-jest preset, node test environment | Confirmed by Bob analysis | 2026-05-01 |
 
 ---
 
@@ -116,12 +121,15 @@ All Incident Detective planning preserved in 10 AI Specialist Outputs.md §1–�
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| $NaN not visually compelling | High — kills the hook | Make it large and red; test browser doesn't auto-convert |
+| $NaN not visually compelling | High — kills the hook | `text-4xl text-red-600 font-bold`; force string `"$NaN"` if browser converts |
+| Port conflicts on 3000/3001/3002 | Medium | Check `lsof -i :PORT` before starting; kill blocking processes |
+| CORS between localhost:3000/3002 and localhost:3001 | Low | Add `cors()` middleware to Express — 2-line fix |
 | Bob Task 1 vague on severity | Medium | Prompt explicitly asks Breaking/Medium/Cosmetic; retry if needed |
 | DriftMatrix polish takes too long | Medium | Build with basic Tailwind first; polish Day 2 |
 | SeverityImpact card looks generic | Medium | Use "checkout confirmation flow" specifically; red badge; bold text |
 | bob_sessions not captured | High — required deliverable | Create folder before first task; export after every session |
 | Accidentally using personal Bob account | Medium | Check ibm-coding-challenge-xxx in settings before every session |
+| Next.js caching / slow hot reload | Low | Use `next dev --turbo` flag |
 
 ---
 
@@ -144,15 +152,17 @@ All Incident Detective planning preserved in 10 AI Specialist Outputs.md §1–�
 ### Day 1 — Get the full ugly demo working
 
 **Morning (3–4h):**
-- [ ] Build broken checkout (backend: totalCents/PAID; frontend: reads total → $NaN)
-- [ ] Confirm $NaN renders large and red
+- [ ] Run setup commands (see 04 Technical Architecture)
+- [ ] Build broken checkout backend (totalCents/PAID) + frontend (reads total → $NaN)
+- [ ] Verify: `localhost:3000/checkout` shows $NaN large and red
 - [ ] Build fixed checkout version
-- [ ] Create drift data JSON (see 04 Technical Architecture for schema)
-- [ ] Build APIDrift UI — all 10 screens, static/hardcoded
+- [ ] Create `drift-scanner/sample-drift-output.json` (schema in 04)
+- [ ] Build APIDrift UI — all 10 screens, static/hardcoded data
 
-**End of Day 1 checkpoint:** Click through all 10 screens. Can be ugly. Must exist.
+**End of Day 1 morning checkpoint:** Click through all 10 screens. Ugly is fine. Must exist.
 
 **Afternoon (3–4h):**
+- [ ] Create `bob_sessions/` folder in project root
 - [ ] Run Bob Tasks 1–4 in Bob IDE; save all outputs as fallback files
 - [ ] Screenshot + export every Bob task session → bob_sessions/
 - [ ] Wire UI to saved Bob outputs (replace hardcoded strings)
@@ -160,18 +170,18 @@ All Incident Detective planning preserved in 10 AI Specialist Outputs.md §1–�
 ### Day 2 — Make it feel like a product
 
 **Morning (2–3h):**
-- [ ] Polish DriftMatrix — severity badges, row colors
-- [ ] Polish SeverityImpact — bold red header, specific flow name
+- [ ] Polish DriftMatrix — severity badges, row tinting
+- [ ] Polish SeverityImpact — bold 🔴 HIGH badge, specific flow name
 - [ ] Add "Powered by IBM Bob" sidebar throughout
-- [ ] Add "Bob is analyzing..." animation on scan
-- [ ] Add before/after on fixed checkout
+- [ ] Add "Bob is analyzing..." scan animation
+- [ ] Add before/after state on fixed checkout
 
 **Afternoon (2–3h):**
 - [ ] Run Bob Task 5 (Bob Skill) if time
 - [ ] Wire Orchestrate ticket routing if time
-- [ ] Record video demo (target 2:45; use script in 06)
-- [ ] Paste written statements
-- [ ] Export final Bob sessions; submit
+- [ ] Record video demo (target 2:45; script in 06)
+- [ ] Paste written statements from 06
+- [ ] Export final Bob sessions; submit before 10:00 AM ET
 
 ---
 
@@ -182,7 +192,7 @@ All Incident Detective planning preserved in 10 AI Specialist Outputs.md §1–�
 | 01 Project Brief | Idea + problem/solution | ✅ Done |
 | 02 Research | Market context | ⬜ TODO |
 | 03 MVP Scope | 10 screens + 5 Bob tasks | ✅ Done |
-| 04 Technical Architecture | Stack + repo + JSON schema + Bob prompts | ✅ Done |
+| 04 Technical Architecture | Stack + setup + JSON schema + Bob prompts | ✅ Done |
 | 05 Task Board | Execution tracking | ⬜ TODO |
 | 06 Demo and Pitch | Script + statements (paste-ready) | ✅ Done |
 | 07 Judge Q&A | 5 Q&A pairs | ✅ Done |
