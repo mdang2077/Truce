@@ -1,0 +1,47 @@
+{
+  "id": "DS-009",
+  "name": "Authentication Scheme Change",
+  "description": "Backend changed authentication from Bearer token to API key without updating OpenAPI spec",
+  "severity": "critical",
+  "driftType": "auth_drift",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/secure/data",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT"
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/middleware/auth.ts",
+    "implementation": "const apiKey = req.headers['x-api-key']; if (!apiKey || !validateApiKey(apiKey)) { return res.status(401).json({ error: 'Invalid API key' }); }"
+  },
+  "frontend": {
+    "path": "apps/web/src/api/secureClient.ts",
+    "usage": "headers: { 'Authorization': `Bearer ${token}` } // returns 401 Unauthorized"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "critical",
+    "fields": [
+      {
+        "field": "authentication",
+        "diagnosis": "auth_drift",
+        "userImpact": "All authenticated requests fail with 401 Unauthorized. Users cannot access protected resources. Complete feature breakdown for logged-in users."
+      }
+    ]
+  }
+}

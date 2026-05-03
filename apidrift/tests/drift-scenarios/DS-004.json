@@ -1,0 +1,55 @@
+{
+  "id": "DS-004",
+  "name": "Enum Case Change - Lowercase to Uppercase",
+  "description": "Backend changed enum values from lowercase to uppercase without updating OpenAPI spec",
+  "severity": "high",
+  "driftType": "enum_drift",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/order/status",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "example": "ORD-456"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "processing",
+            "shipped",
+            "delivered",
+            "cancelled"
+          ],
+          "example": "processing"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/order.ts",
+    "implementation": "res.json({ orderId: 'ORD-456', status: 'PROCESSING', lastUpdated: '2026-05-03T07:00:00Z' })"
+  },
+  "frontend": {
+    "path": "apps/web/src/components/OrderStatus.tsx",
+    "usage": "if (data.status === 'processing') { /* never matches */ }"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "high",
+    "fields": [
+      {
+        "field": "status",
+        "diagnosis": "enum_drift",
+        "userImpact": "Order status displays as 'Unknown' or 'Invalid'. Status-based UI logic fails, preventing users from tracking orders or taking status-specific actions."
+      }
+    ]
+  }
+}

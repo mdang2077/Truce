@@ -1,0 +1,97 @@
+═══════════════════════════════════════════════════════
+           APIDrift Detection Accuracy Report          
+═══════════════════════════════════════════════════════
+
+OVERALL METRICS:
+  Total Tests:           12
+  Precision:             100.00%
+  Recall:                91.67%
+  F1 Score:              95.65%
+  Severity Accuracy:     72.73%
+  Field Accuracy:        83.33%
+  Avg Execution Time:    0.08ms
+
+CONFUSION MATRIX:
+  True Positives:        11
+  False Positives:       0
+  True Negatives:        0
+  False Negatives:       1
+
+DETAILED RESULTS:
+─────────────────────────────────────────────────────
+  DS-001: ✓ PASS
+    Expected: Drift (high)
+    Detected: Drift (high)
+    Fields: 6/2 detected
+    Time: 1ms
+
+  DS-002: ✓ PASS
+    Expected: Drift (high)
+    Detected: Drift (high)
+    Fields: 1/1 detected
+    Time: 0ms
+
+  DS-003: ✗ FAIL
+    Expected: Drift (critical)
+    Detected: Drift (high)
+    Fields: 3/2 detected
+    Time: 0ms
+
+  DS-004: ✓ PASS
+    Expected: Drift (high)
+    Detected: Drift (high)
+    Fields: 3/1 detected
+    Time: 0ms
+
+  DS-005: ✓ PASS
+    Expected: Drift (low)
+    Detected: Drift (low)
+    Fields: 2/2 detected
+    Time: 0ms
+
+  DS-006: ✓ PASS
+    Expected: Drift (high)
+    Detected: Drift (high)
+    Fields: 1/1 detected
+    Time: 0ms
+
+  DS-007: ✗ FAIL
+    Expected: Drift (medium)
+    Detected: Drift (high)
+    Fields: 5/2 detected
+    Time: 0ms
+
+  DS-008: ✗ FAIL
+    Expected: Drift (medium)
+    Detected: No Drift (none)
+    Fields: 0/3 detected
+    Time: 0ms
+
+  DS-009: ✓ PASS
+    Expected: Drift (critical)
+    Detected: Drift (critical)
+    Fields: 2/1 detected
+    Time: 0ms
+
+  DS-010: ✗ FAIL
+    Expected: Drift (medium)
+    Detected: Drift (high)
+    Fields: 3/1 detected
+    Time: 0ms
+
+  DS-011: ✓ PASS
+    Expected: Drift (critical)
+    Detected: Drift (critical)
+    Fields: 3/1 detected
+    Time: 0ms
+
+  DS-012: ✓ PASS
+    Expected: Drift (high)
+    Detected: Drift (high)
+    Fields: 4/1 detected
+    Time: 0ms
+
+═══════════════════════════════════════════════════════
+SUMMARY: 8/12 tests passed
+✗ 4 test(s) failed
+═══════════════════════════════════════════════════════

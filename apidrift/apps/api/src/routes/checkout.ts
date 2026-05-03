@@ -8,7 +8,7 @@ const router = Router();
 router.post('/checkout', (req, res) => {
   res.json({
     orderId: "ORD-1042",
-    totalCents: 8470,   // was: total: 84.70
+r    totalCents: 8470,   // was: total: 84.70
     status: "PAID"      // was: status: "paid"
   });
 });

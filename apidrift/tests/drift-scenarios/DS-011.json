@@ -1,0 +1,43 @@
+{
+  "id": "DS-011",
+  "name": "Endpoint Removal",
+  "description": "Backend removed an endpoint that frontend still depends on",
+  "severity": "critical",
+  "driftType": "endpoint_missing",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/legacy/report",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "reportId": {
+          "type": "string",
+          "example": "RPT-2024-001"
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/legacy.ts",
+    "implementation": "// Endpoint removed - returns 404"
+  },
+  "frontend": {
+    "path": "apps/web/src/components/ReportViewer.tsx",
+    "usage": "fetch('/api/legacy/report') // 404 Not Found"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "critical",
+    "fields": [
+      {
+        "field": "endpoint",
+        "diagnosis": "endpoint_missing",
+        "userImpact": "Complete feature failure. Report viewer shows 404 error. Users cannot access historical reports. Critical business functionality broken."
+      }
+    ]
+  }
+}

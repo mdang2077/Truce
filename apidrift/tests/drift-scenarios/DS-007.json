@@ -1,0 +1,62 @@
+{
+  "id": "DS-007",
+  "name": "Nested Object Structure Change",
+  "description": "Backend changed nested object structure without updating OpenAPI spec",
+  "severity": "medium",
+  "driftType": "nested_drift",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/customer/profile",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "customerId": {
+          "type": "string",
+          "example": "CUST-456"
+        },
+        "address": {
+          "type": "object",
+          "properties": {
+            "street": {
+              "type": "string",
+              "example": "123 Main St"
+            },
+            "city": {
+              "type": "string",
+              "example": "San Francisco"
+            },
+            "zipCode": {
+              "type": "string",
+              "example": "94102"
+            }
+          }
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/customer.ts",
+    "implementation": "res.json({ customerId: 'CUST-456', address: { streetAddress: '123 Main St', city: 'San Francisco', postalCode: '94102', country: 'USA' } })"
+  },
+  "frontend": {
+    "path": "apps/web/src/components/AddressDisplay.tsx",
+    "usage": "const street = data.address.street; // undefined, const zip = data.address.zipCode; // undefined"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "medium",
+    "fields": [
+      {
+        "field": "address.street",
+        "diagnosis": "nested_drift",
+        "userImpact": "Address display incomplete. Street address not shown, causing shipping and billing issues."
+      },
+      {
+        "field": "address.zipCode",
+        "diagnosis": "nested_drift",
+        "userImpact": "Postal code missing from address display. May affect shipping calculations and address validation."
+      }
+    ]
+  }
+}

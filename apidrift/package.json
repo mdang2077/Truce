@@ -3,13 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev:api":      "cd apps/api && npm run dev",
+    "dev:api": "cd apps/api && npm run dev",
     "dev:checkout": "cd apps/web && npm run dev",
-    "dev:ui":       "cd apidrift-ui && npm run dev",
-    "dev:all":      "concurrently \"npm run dev:api\" \"npm run dev:checkout\" \"npm run dev:ui\"",
-    "test":         "cd apps/api && npm test"
+    "dev:ui": "cd apidrift-ui && npm run dev",
+    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:checkout\" \"npm run dev:ui\"",
+    "test": "cd apps/api && npm test",
+    "validate:production": "ts-node tests/validation/run-validation.ts",
+    "validate:scenario": "ts-node tests/validation/run-validation.ts",
+    "validate:report": "ts-node tests/validation/run-validation.ts"
   },
   "devDependencies": {
-    "concurrently": "^8.0.0"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.6.0",
+    "concurrently": "^8.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   }
 }

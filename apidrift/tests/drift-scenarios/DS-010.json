@@ -1,0 +1,49 @@
+{
+  "id": "DS-010",
+  "name": "Response Status Code Change",
+  "description": "Backend changed success response code from 200 to 201 without updating OpenAPI spec",
+  "severity": "medium",
+  "driftType": "status_code_drift",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/resource/create",
+    "method": "POST",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "resourceId": {
+          "type": "string",
+          "example": "RES-789"
+        },
+        "status": {
+          "type": "string",
+          "example": "created"
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Resource created successfully"
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/resource.ts",
+    "implementation": "res.status(201).json({ resourceId: 'RES-789', status: 'created' })"
+  },
+  "frontend": {
+    "path": "apps/web/src/api/resourceClient.ts",
+    "usage": "if (response.status === 200) { /* success handler never runs */ } else { /* error handler runs instead */ }"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "medium",
+    "fields": [
+      {
+        "field": "responseCode",
+        "diagnosis": "status_code_drift",
+        "userImpact": "Success responses treated as errors. User sees error messages despite successful operations. Confusing UX where actions succeed but UI shows failure."
+      }
+    ]
+  }
+}

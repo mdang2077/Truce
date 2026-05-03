@@ -1,0 +1,53 @@
+{
+  "id": "DS-001",
+  "name": "Field Rename - userId to user_id",
+  "description": "Backend changed field name from camelCase to snake_case without updating OpenAPI spec or frontend",
+  "severity": "high",
+  "driftType": "field_rename",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/user/profile",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "example": "user-12345"
+        },
+        "email": {
+          "type": "string",
+          "example": "user@example.com"
+        },
+        "displayName": {
+          "type": "string",
+          "example": "John Doe"
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/user.ts",
+    "implementation": "res.json({ user_id: 'user-12345', email: 'user@example.com', display_name: 'John Doe' })"
+  },
+  "frontend": {
+    "path": "apps/web/src/api/userClient.ts",
+    "usage": "const userId = data.userId; // expects userId, gets undefined"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "high",
+    "fields": [
+      {
+        "field": "userId",
+        "diagnosis": "field_rename",
+        "userImpact": "Frontend cannot access user ID, causing authentication and personalization features to fail. User sees 'undefined' in profile displays."
+      },
+      {
+        "field": "displayName",
+        "diagnosis": "field_rename",
+        "userImpact": "User's display name not shown correctly, replaced with 'undefined' or fallback value."
+      }
+    ]
+  }
+}

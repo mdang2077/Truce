@@ -1,0 +1,48 @@
+{
+  "id": "DS-002",
+  "name": "Type Change - Number to String",
+  "description": "Backend changed quantity field from number to string without updating OpenAPI spec",
+  "severity": "high",
+  "driftType": "type_mismatch",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/inventory/item",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "itemId": {
+          "type": "string",
+          "example": "ITEM-789"
+        },
+        "quantity": {
+          "type": "number",
+          "example": 42
+        },
+        "price": {
+          "type": "number",
+          "example": 29.99
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/inventory.ts",
+    "implementation": "res.json({ itemId: 'ITEM-789', quantity: '42', price: 29.99 })"
+  },
+  "frontend": {
+    "path": "apps/web/src/components/InventoryDisplay.tsx",
+    "usage": "const total = data.quantity * data.price; // '42' * 29.99 = NaN"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "high",
+    "fields": [
+      {
+        "field": "quantity",
+        "diagnosis": "type_mismatch",
+        "userImpact": "Mathematical operations fail, causing incorrect inventory calculations. Cart totals show NaN, preventing checkout completion."
+      }
+    ]
+  }
+}

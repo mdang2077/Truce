@@ -1,0 +1,228 @@
+{
+  "testRun": {
+    "timestamp": "2026-05-03T07:23:18.789Z",
+    "totalTests": 12
+  },
+  "metrics": {
+    "precision": "100.00%",
+    "recall": "91.67%",
+    "f1Score": "95.65%",
+    "severityAccuracy": "72.73%",
+    "fieldAccuracy": "83.33%",
+    "averageExecutionTime": "0.08ms"
+  },
+  "confusionMatrix": {
+    "truePositives": 11,
+    "falsePositives": 0,
+    "trueNegatives": 0,
+    "falseNegatives": 1
+  },
+  "detailedResults": [
+    {
+      "scenarioId": "DS-001",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "high",
+      "detectedSeverity": "high",
+      "expectedFields": [
+        "userId",
+        "displayName"
+      ],
+      "detectedFields": [
+        "userId",
+        "displayName",
+        "user_id",
+        "display_name",
+        "userId",
+        "displayName"
+      ],
+      "executionTimeMs": 1,
+      "status": "PASS"
+    },
+    {
+      "scenarioId": "DS-002",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "high",
+      "detectedSeverity": "high",
+      "expectedFields": [
+        "quantity"
+      ],
+      "detectedFields": [
+        "quantity"
+      ],
+      "executionTimeMs": 0,
+      "status": "PASS"
+    },
+    {
+      "scenarioId": "DS-003",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "critical",
+      "detectedSeverity": "high",
+      "expectedFields": [
+        "total",
+        "status"
+      ],
+      "detectedFields": [
+        "total",
+        "status",
+        "totalCents"
+      ],
+      "executionTimeMs": 0,
+      "status": "FAIL"
+    },
+    {
+      "scenarioId": "DS-004",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "high",
+      "detectedSeverity": "high",
+      "expectedFields": [
+        "status"
+      ],
+      "detectedFields": [
+        "orderId",
+        "status",
+        "lastUpdated"
+      ],
+      "executionTimeMs": 0,
+      "status": "PASS"
+    },
+    {
+      "scenarioId": "DS-005",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "low",
+      "detectedSeverity": "low",
+      "expectedFields": [
+        "inStock",
+        "rating"
+      ],
+      "detectedFields": [
+        "inStock",
+        "rating"
+      ],
+      "executionTimeMs": 0,
+      "status": "PASS"
+    },
+    {
+      "scenarioId": "DS-006",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "high",
+      "detectedSeverity": "high",
+      "expectedFields": [
+        "language"
+      ],
+      "detectedFields": [
+        "language"
+      ],
+      "executionTimeMs": 0,
+      "status": "PASS"
+    },
+    {
+      "scenarioId": "DS-007",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "medium",
+      "detectedSeverity": "high",
+      "expectedFields": [
+        "address.street",
+        "address.zipCode"
+      ],
+      "detectedFields": [
+        "address.street",
+        "address.zipCode",
+        "address.streetAddress",
+        "address.postalCode",
+        "address.country"
+      ],
+      "executionTimeMs": 0,
+      "status": "FAIL"
+    },
+    {
+      "scenarioId": "DS-008",
+      "expectedDrift": true,
+      "detectedDrift": false,
+      "expectedSeverity": "medium",
+      "detectedSeverity": "none",
+      "expectedFields": [
+        "items[].itemId",
+        "items[].quantity",
+        "items[].price"
+      ],
+      "detectedFields": [],
+      "executionTimeMs": 0,
+      "status": "FAIL"
+    },
+    {
+      "scenarioId": "DS-009",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "critical",
+      "detectedSeverity": "critical",
+      "expectedFields": [
+        "authentication"
+      ],
+      "detectedFields": [
+        "data",
+        "authentication"
+      ],
+      "executionTimeMs": 0,
+      "status": "PASS"
+    },
+    {
+      "scenarioId": "DS-010",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "medium",
+      "detectedSeverity": "high",
+      "expectedFields": [
+        "responseCode"
+      ],
+      "detectedFields": [
+        "resourceId",
+        "status",
+        "responseCode"
+      ],
+      "executionTimeMs": 0,
+      "status": "FAIL"
+    },
+    {
+      "scenarioId": "DS-011",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "critical",
+      "detectedSeverity": "critical",
+      "expectedFields": [
+        "endpoint"
+      ],
+      "detectedFields": [
+        "reportId",
+        "data",
+        "endpoint"
+      ],
+      "executionTimeMs": 0,
+      "status": "PASS"
+    },
+    {
+      "scenarioId": "DS-012",
+      "expectedDrift": true,
+      "detectedDrift": true,
+      "expectedSeverity": "high",
+      "detectedSeverity": "high",
+      "expectedFields": [
+        "httpMethod"
+      ],
+      "detectedFields": [
+        "userId",
+        "displayName",
+        "email",
+        "httpMethod"
+      ],
+      "executionTimeMs": 0,
+      "status": "PASS"
+    }
+  ]
+}

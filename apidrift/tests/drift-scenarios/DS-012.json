@@ -1,0 +1,48 @@
+{
+  "id": "DS-012",
+  "name": "HTTP Method Change",
+  "description": "Backend changed HTTP method from POST to PUT without updating OpenAPI spec",
+  "severity": "high",
+  "driftType": "method_change",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/profile/update",
+    "method": "POST",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "example": "user-456"
+        },
+        "displayName": {
+          "type": "string",
+          "example": "Jane Smith"
+        },
+        "email": {
+          "type": "string",
+          "example": "jane@example.com"
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/profile.ts",
+    "implementation": "router.put('/api/profile/update', (req, res) => { /* handler */ }); // Changed from POST to PUT"
+  },
+  "frontend": {
+    "path": "apps/web/src/api/profileClient.ts",
+    "usage": "fetch('/api/profile/update', { method: 'POST', body: JSON.stringify(data) }) // Returns 404 or 405 Method Not Allowed"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "high",
+    "fields": [
+      {
+        "field": "httpMethod",
+        "diagnosis": "method_change",
+        "userImpact": "Profile updates fail with 404 or 405 errors. Users cannot save profile changes. Data loss risk if users repeatedly attempt updates."
+      }
+    ]
+  }
+}

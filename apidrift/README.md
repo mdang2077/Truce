@@ -42,6 +42,15 @@ cd apidrift-ui; npx create-next-app@latest . --typescript --tailwind --app --no-
 
 # Run all three apps
 npm run dev:all
+# OR run individually (option 2: separate terminals)
+# Terminal 1: APIDrift UI
+cd apidrift-ui; npm run dev
+
+# Terminal 2: Backend API
+cd apps/api; npm run dev
+
+# Terminal 3: Demo Frontend
+cd apps/web; npm run dev
 ```
 
 ## Verify
@@ -63,3 +72,16 @@ See `vault/04 Technical Architecture.md` for full prompts.
 ## Submission Deadline
 
 10:00 AM ET, May 3, 2026
+
+## Running Tests
+
+```powershell
+# Run contract tests
+cd apps/api
+npm test
+
+# Expected output: 3 tests passing
+# ✓ should return totalCents as integer (not total as float)
+# ✓ should return status in uppercase (e.g., "PAID" not "paid")
+# ✓ should return all required fields with correct types
+```

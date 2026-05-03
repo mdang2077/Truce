@@ -1,0 +1,54 @@
+{
+  "id": "DS-006",
+  "name": "Required Field Removal",
+  "description": "Backend removed a required field that frontend depends on",
+  "severity": "high",
+  "driftType": "missing_field",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/user/settings",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "example": "user-789"
+        },
+        "theme": {
+          "type": "string",
+          "enum": ["light", "dark", "auto"],
+          "example": "dark"
+        },
+        "notifications": {
+          "type": "boolean",
+          "example": true
+        },
+        "language": {
+          "type": "string",
+          "example": "en"
+        }
+      },
+      "required": ["userId", "theme", "notifications", "language"]
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/settings.ts",
+    "implementation": "res.json({ userId: 'user-789', theme: 'dark', notifications: true })"
+  },
+  "frontend": {
+    "path": "apps/web/src/components/Settings.tsx",
+    "usage": "const lang = data.language; // undefined, causes i18n to fail"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "high",
+    "fields": [
+      {
+        "field": "language",
+        "diagnosis": "missing_field",
+        "userImpact": "Internationalization breaks. App displays in wrong language or shows translation keys instead of text. Settings page may crash."
+      }
+    ]
+  }
+}

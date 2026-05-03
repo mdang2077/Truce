@@ -1,0 +1,70 @@
+{
+  "id": "DS-008",
+  "name": "Array Item Schema Change",
+  "description": "Backend changed the schema of items within an array without updating OpenAPI spec",
+  "severity": "medium",
+  "driftType": "array_item_drift",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/cart/items",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cartId": {
+          "type": "string",
+          "example": "CART-999"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": {
+                "type": "string",
+                "example": "ITEM-123"
+              },
+              "quantity": {
+                "type": "number",
+                "example": 2
+              },
+              "price": {
+                "type": "number",
+                "example": 49.99
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/cart.ts",
+    "implementation": "res.json({ cartId: 'CART-999', items: [{ id: 'ITEM-123', qty: 2, unitPrice: 49.99, subtotal: 99.98 }] })"
+  },
+  "frontend": {
+    "path": "apps/web/src/components/CartView.tsx",
+    "usage": "items.map(item => item.itemId) // undefined for all items"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "medium",
+    "fields": [
+      {
+        "field": "items[].itemId",
+        "diagnosis": "array_item_drift",
+        "userImpact": "Cart items cannot be identified. Product details, images, and links fail to load. Cart appears empty or broken."
+      },
+      {
+        "field": "items[].quantity",
+        "diagnosis": "array_item_drift",
+        "userImpact": "Item quantities not displayed. Users cannot see how many of each item they're purchasing."
+      },
+      {
+        "field": "items[].price",
+        "diagnosis": "array_item_drift",
+        "userImpact": "Individual item prices not shown. Total calculation may fail."
+      }
+    ]
+  }
+}

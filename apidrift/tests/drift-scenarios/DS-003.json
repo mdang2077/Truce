@@ -1,0 +1,54 @@
+{
+  "id": "DS-003",
+  "name": "Unit Change - Dollars to Cents",
+  "description": "Backend changed from dollars (float) to cents (integer) without updating frontend or OpenAPI spec",
+  "severity": "critical",
+  "driftType": "unit_change",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/checkout",
+    "method": "POST",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "example": "ORD-1042"
+        },
+        "total": {
+          "type": "number",
+          "description": "Total order amount in dollars",
+          "example": 84.7
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "paid", "failed"]
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/checkout.ts",
+    "implementation": "res.json({ orderId: 'ORD-1042', totalCents: 8470, status: 'PAID' })"
+  },
+  "frontend": {
+    "path": "apps/web/src/api/checkoutClient.ts",
+    "usage": "const total = data.total; // expects dollars, gets undefined"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "critical",
+    "fields": [
+      {
+        "field": "total",
+        "diagnosis": "field_rename + unit_change",
+        "userImpact": "Frontend displays $NaN instead of correct amount. Backend returns totalCents (integer cents) but frontend expects total (float dollars)."
+      },
+      {
+        "field": "status",
+        "diagnosis": "enum_drift",
+        "userImpact": "Payment status shows 'Unknown' because frontend expects lowercase 'paid' but backend returns uppercase 'PAID'."
+      }
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "id": "DS-005",
+  "name": "Optional Field Addition",
+  "description": "Backend added new optional field that's not in OpenAPI spec - low severity, backward compatible",
+  "severity": "low",
+  "driftType": "optional_field_addition",
+  "openapi": {
+    "path": "contracts/openapi.yaml",
+    "endpoint": "/api/product/details",
+    "method": "GET",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "example": "PROD-123"
+        },
+        "name": {
+          "type": "string",
+          "example": "Widget Pro"
+        },
+        "price": {
+          "type": "number",
+          "example": 99.99
+        }
+      }
+    }
+  },
+  "backend": {
+    "path": "apps/api/src/routes/product.ts",
+    "implementation": "res.json({ productId: 'PROD-123', name: 'Widget Pro', price: 99.99, inStock: true, rating: 4.5 })"
+  },
+  "frontend": {
+    "path": "apps/web/src/components/ProductCard.tsx",
+    "usage": "const { productId, name, price } = data; // works fine, ignores extra fields"
+  },
+  "expectedDetection": {
+    "driftFound": true,
+    "severity": "low",
+    "fields": [
+      {
+        "field": "inStock",
+        "diagnosis": "optional_addition",
+        "userImpact": "No immediate impact. Frontend ignores new field. Opportunity to enhance UI with stock status if documented."
+      },
+      {
+        "field": "rating",
+        "diagnosis": "optional_addition",
+        "userImpact": "No immediate impact. Frontend could display product ratings if field is documented and consumed."
+      }
+    ]
+  }
+}
